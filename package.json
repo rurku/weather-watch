@@ -1,0 +1,21 @@
+{
+  "name": "weather-watch",
+  "version": "1.0.0",
+  "description": "Angular application that shows temperature graphs based on readings stored in DynamoDB",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rurku/weather-watch.git"
+  },
+  "author": "rurku",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rurku/weather-watch/issues"
+  },
+  "homepage": "https://github.com/rurku/weather-watch#readme",
+  "dependencies": {
+    "@angular/cli": "^7.3.4"
+  }
+}
