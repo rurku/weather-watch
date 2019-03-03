@@ -1,5 +1,7 @@
 <!--The content below is only a placeholder and can be replaced.-->
-<div *ngIf="reading; else elseBlock" >
-  {{ reading.temp }} <br> {{ reading.time }}
+<div *ngIf="reading" style="text-align: center; font-family: Arial, Helvetica, sans-serif">
+  Temperature: {{ reading.temp }}℃, Last sample: {{ reading.time }}
 </div>
-<ng-template #elseBlock>Loading temperature</ng-template>
+<div [hidden]="!chart" >
+  <canvas id="canvas2">{{ chart }}</canvas>
+</div>

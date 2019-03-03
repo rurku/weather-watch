@@ -1,3 +1,4 @@
 node_modules
 .vscode/*
 aws-config.json
+dist/*
