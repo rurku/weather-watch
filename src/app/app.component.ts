@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import * as AWS from 'aws-sdk';
-import * as moment from 'moment';
-import { Chart } from 'chart.js';
-import * as _ from 'lodash';
+import * as AWS from 'aws-sdk/global';
+import * as DynamoDB from 'aws-sdk/clients/dynamodb';
+import { format } from 'date-fns';
+import * as Chart from 'chart.js';
+import { groupBy as _groupBy, map as _map, minBy as _minBy, maxBy as _maxBy, meanBy as _meanBy } from 'lodash-es';
 
 import * as AWSConfig from './aws-config.json';
-import { DynamoDB } from 'aws-sdk';
 
 @Component({
   selector: 'app-root',
@@ -22,7 +22,7 @@ export class AppComponent implements OnInit {
     AWS.config.credentials = new AWS.CognitoIdentityCredentials({
       IdentityPoolId: AWSConfig.IdentityPoolId
     });
-    this.dynamodb = new AWS.DynamoDB();
+    this.dynamodb = new DynamoDB();
   }
 
   ngOnInit() {
@@ -46,8 +46,8 @@ export class AppComponent implements OnInit {
     const result = await this.dynamodb.scan(params).promise();
     const lastReading = result.Items.sort((a, b) => ((parseInt(a.timestamp.N, 10) > parseInt(b.timestamp.N, 10)) ? -1 : 1))[0];
     console.debug(`scanned: ${result.ScannedCount} count: ${result.Count} capacity: ${JSON.stringify(result.ConsumedCapacity)}`);
-    const lastTimestamp = moment(parseInt(lastReading.timestamp.N, 10) * 1000);
-    this.reading = {temp: parseFloat(lastReading.temp.N).toFixed(1), time: lastTimestamp.format('YYYY-MM-DD HH:mm:ss')};
+    const lastTimestamp = new Date(parseInt(lastReading.timestamp.N, 10) * 1000);
+    this.reading = {temp: parseFloat(lastReading.temp.N).toFixed(1), time: format(lastTimestamp, 'YYYY-MM-DD HH:mm:ss')};
     this.showChart(result, rangeStart, nowUtc);
   }
 
@@ -58,16 +58,16 @@ export class AppComponent implements OnInit {
         y: parseFloat(item.temp.N)
       };
     });
-    const grouped = _.groupBy(data, i => Math.floor(i.x / 600) * 600);
-    const average = _.map(grouped, (g, key) => {
+    const grouped = _groupBy(data, i => Math.floor(i.x / 600) * 600);
+    const average = _map(grouped, (g, key) => {
       return {
-        y: Math.round(_.meanBy(g, item => item.y) * 100) / 100,
+        y: Math.round(_meanBy(g, item => item.y) * 100) / 100,
         x: key,
       };
     });
 
-    const minValue = _.minBy(average, x => x.y).y;
-    const maxValue = _.maxBy(average, x => x.y).y;
+    const minValue = _minBy(average, x => x.y).y;
+    const maxValue = _maxBy(average, x => x.y).y;
     let suggestedLow: number;
     let suggestedHigh: number;
     if (maxValue - minValue < 6)
@@ -111,7 +111,7 @@ export class AppComponent implements OnInit {
                   max: timestampTo,
                   stepSize: 3600,
                   callback: (value, index, values) => {
-                    return moment(value * 1000).format('HH:mm');
+                    return format(value * 1000, 'HH:mm');
                   }
                 }
               }],
@@ -124,10 +124,10 @@ export class AppComponent implements OnInit {
           },
           tooltips: {
             callbacks: {
-              label: function (tooltipItem, data) {
+              label: (tooltipItem) =>  {
                 return [
                   `${tooltipItem.yLabel}℃`,
-                  moment(tooltipItem.xLabel * 1000).format('YYYY-MM-DD HH:mm')
+                  format(parseInt(tooltipItem.xLabel, 10) * 1000, 'YYYY-MM-DD HH:mm')
                 ];
               }
             }
