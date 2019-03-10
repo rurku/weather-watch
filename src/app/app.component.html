@@ -3,7 +3,11 @@
   <mat-datepicker-toggle matSuffix [for]="myDatepicker"></mat-datepicker-toggle>
   <mat-datepicker #myDatepicker></mat-datepicker>
 </mat-form-field>
-
+<mat-form-field>
+  <input matInput placeholder="Time" [(ngModel)]="time" pattern="^([0-1][0-9]|2[0-3]):([0-5][0-9])$"
+  (keyup.enter)="scheduleRefresh()"
+  (blur)="scheduleRefresh()">
+</mat-form-field>
 <mat-form-field>
   <input matInput placeholder="Period" [(ngModel)]="period"
     (keyup.enter)="scheduleRefresh()"
@@ -15,9 +19,13 @@
   </mat-button-toggle-group>
 
 </mat-form-field>
-<div *ngIf="reading" style="text-align: center; font-family: Arial, Helvetica, sans-serif">
+
+<button mat-button (click)="previousPeriod()"><mat-icon>skip_previous</mat-icon></button>
+<button mat-button (click)="nextPeriod()"><mat-icon>skip_next</mat-icon></button>
+
+<p *ngIf="reading" style='text-align: center; font-family: Roboto,"Helvetica Neue",sans-serif'>
   Temperature: {{ reading.temp }}℃, Last sample: {{ reading.time }}
-</div>
+</p>
 <div [hidden]="!chart" >
   <canvas id="canvas2">{{ chart }}</canvas>
 </div>
