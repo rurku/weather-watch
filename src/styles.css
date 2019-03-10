@@ -5,3 +5,29 @@
 .mat-form-field-suffix .mat-button-toggle .mat-button-toggle-label-content {
   line-height: 30px;
 }
+
+
+mat-form-field.input-time .mat-form-field-infix {
+  width: 60px;
+}
+
+mat-form-field.input-period .mat-form-field-infix {
+  width: 40px;
+}
+
+mat-form-field.input-date .mat-form-field-infix {
+  width: 90px;
+}
+
+.mat-button.period-nav {
+  min-width: 0;
+  padding: 0;
+}
+
+mat-form-field.mat-form-field .mat-form-field-wrapper {
+  padding: 0px 0px 10px;
+}
+
+mat-form-field.mat-form-field .mat-form-field-underline {
+  bottom: 10px;
+}

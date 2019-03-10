@@ -1,31 +1,31 @@
-<mat-form-field>
+<p *ngIf="reading" style='text-align: left; font-family: Roboto,"Helvetica Neue",sans-serif; margin: 0px 0px 10px; padding: 0'>
+    Temperature: <strong>{{ reading.temp }}℃</strong>, Last sample: {{ reading.time }}
+</p>
+<mat-form-field class="input-date">
   <input matInput [matDatepicker]="myDatepicker" placeholder="Date" [(ngModel)]="date" (dateChange)="scheduleRefresh()">
   <mat-datepicker-toggle matSuffix [for]="myDatepicker"></mat-datepicker-toggle>
   <mat-datepicker #myDatepicker></mat-datepicker>
 </mat-form-field>
-<mat-form-field>
+<mat-form-field class="input-time">
   <input matInput placeholder="Time" [(ngModel)]="time" pattern="^([0-1][0-9]|2[0-3]):([0-5][0-9])$"
   (keyup.enter)="scheduleRefresh()"
-  (blur)="scheduleRefresh()">
+  (blur)="scheduleRefresh()" >
 </mat-form-field>
-<mat-form-field>
+<mat-form-field class="input-period">
   <input matInput placeholder="Period" [(ngModel)]="period"
     (keyup.enter)="scheduleRefresh()"
     (blur)="scheduleRefresh()">
   <mat-button-toggle-group matSuffix name="timePeriod" (change)="periodChange($event.value)">
-    <mat-button-toggle value="1 day">1 day</mat-button-toggle>
-    <mat-button-toggle value="7 days">7 days</mat-button-toggle>
-    <mat-button-toggle value="1 month">1 month</mat-button-toggle>
+    <mat-button-toggle value="1d">1d</mat-button-toggle>
+    <mat-button-toggle value="7d">7d</mat-button-toggle>
+    <mat-button-toggle value="1M">1M</mat-button-toggle>
   </mat-button-toggle-group>
 
 </mat-form-field>
 
-<button mat-button (click)="previousPeriod()"><mat-icon>skip_previous</mat-icon></button>
-<button mat-button (click)="nextPeriod()"><mat-icon>skip_next</mat-icon></button>
+<button mat-button (click)="previousPeriod()" class="period-nav"><mat-icon>skip_previous</mat-icon></button>
+<button mat-button (click)="nextPeriod()" class="period-nav"><mat-icon>skip_next</mat-icon></button>
 
-<p *ngIf="reading" style='text-align: center; font-family: Roboto,"Helvetica Neue",sans-serif'>
-  Temperature: {{ reading.temp }}℃, Last sample: {{ reading.time }}
-</p>
 <div [hidden]="!chart" >
   <canvas id="canvas2">{{ chart }}</canvas>
 </div>

@@ -54,7 +54,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.setDate(moment());
-    this.period = '1 day';
+    this.period = '1d';
 
     this.scheduleRefresh();
   }
@@ -212,7 +212,7 @@ export class AppComponent implements OnInit {
           },
           options: {
             responsive: true,
-            aspectRatio: 4,
+            aspectRatio: 3,
             scales: {
                 xAxes: [{
                   id: 'primary',
