@@ -1,4 +1,20 @@
-<!--The content below is only a placeholder and can be replaced.-->
+<mat-form-field>
+  <input matInput [matDatepicker]="myDatepicker" placeholder="Date" [(ngModel)]="date" (dateChange)="refresh()">
+  <mat-datepicker-toggle matSuffix [for]="myDatepicker"></mat-datepicker-toggle>
+  <mat-datepicker #myDatepicker></mat-datepicker>
+</mat-form-field>
+
+<mat-form-field>
+  <input matInput placeholder="Period" [(ngModel)]="period"
+    (keyup.enter)="scheduleRefresh()"
+    (blur)="scheduleRefresh()">
+  <mat-button-toggle-group matSuffix name="timePeriod" (change)="periodChange($event.value)">
+    <mat-button-toggle value="1 day">1 day</mat-button-toggle>
+    <mat-button-toggle value="7 days">7 days</mat-button-toggle>
+    <mat-button-toggle value="1 month">1 month</mat-button-toggle>
+  </mat-button-toggle-group>
+
+</mat-form-field>
 <div *ngIf="reading" style="text-align: center; font-family: Arial, Helvetica, sans-serif">
   Temperature: {{ reading.temp }}℃, Last sample: {{ reading.time }}
 </div>
