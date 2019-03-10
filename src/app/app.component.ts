@@ -74,7 +74,6 @@ export class AppComponent implements OnInit {
       const period = match.groups.period as moment.unitOfTime.DurationConstructor;
       const rangeStart = moment(this.date).utc().add(-parseInt(match.groups.number, 10), period).unix();
       const resolution = 672;
-      //const resolution = 2787;
 
       const minSampleRate = (rangeEnd - rangeStart) / resolution;
 
@@ -101,8 +100,8 @@ export class AppComponent implements OnInit {
 
       const items: DynamoDB.AttributeMap[] = [];
 
-      let pkRange = moment.unix(rangeStart).utc();
-      const pkRangeEnd = formatPk(moment.unix(rangeEnd).utc())
+      const pkRange = moment.unix(rangeStart).utc();
+      const pkRangeEnd = formatPk(moment.unix(rangeEnd).utc());
       while (formatPk(pkRange) <= pkRangeEnd) {
         const params: DynamoDB.QueryInput = {
           TableName: 'temperature',
@@ -148,8 +147,7 @@ export class AppComponent implements OnInit {
     const maxValue = _maxBy(average, x => x.y).y;
     let suggestedLow: number;
     let suggestedHigh: number;
-    if (maxValue - minValue < 6)
-    {
+    if (maxValue - minValue < 6) {
       suggestedLow = (maxValue + minValue) / 2 + 3;
       suggestedHigh = (maxValue + minValue) / 2 - 3;
     }
@@ -161,15 +159,13 @@ export class AppComponent implements OnInit {
               datasets: [{
                   data: average,
                   fill: false,
-                  borderColor: 'rgba(200,200,200,1)',
+                  borderColor: 'rgba(50,50,50,1)',
                   borderWidth: 1,
-                  //borderWidth: 1,
                   showLine: true,
-                  pointRadius: 1.5,
+                  pointRadius: 0.5,
                   pointHitRadius: 0,
                   pointBorderWidth: 0,
                   pointBackgroundColor: 'rgba(0,0,0,1)',
-                  //pointHoverBackgroundColor: 'rgba(50,50,50,1)'
               }]
           },
           options: {
@@ -177,54 +173,61 @@ export class AppComponent implements OnInit {
             aspectRatio: 4,
             scales: {
                 xAxes: [{
-                  afterBuildTicks: (a: any) => {
+                  id: 'primary',
+                  afterBuildTicks: (axis: any) => {
                     const ticks: number[] = [];
-                    let hours: number[];
-                    if (a.max - a.min > 10 * 24 * 3600) {
-                      hours = [0];
-                    } else if (a.max - a.min > 24 * 3600) {
-                      hours = [0, 6, 12, 18];
-                    } else {
-                      hours = Array.from(Array(24).keys());
-                    }
-                    let tick = Math.ceil(a.min / 3600) * 3600;
-                    while (tick <= a.max) {
-                      if (hours.includes(moment.unix(tick).hour())) {
-                        ticks.push(tick);
-                      }
+                    let tick = Math.ceil(axis.min / 3600) * 3600;
+                    while (tick <= axis.max) {
+                      ticks.push(tick);
                       tick += 3600;
                     }
-                    a.ticks = ticks;
+                    axis.ticks = ticks;
                   },
                   ticks: {
                     min: timestampFrom,
                     max: timestampTo,
-                    stepSize: 3600,
                     callback: (value, index, values): any => {
-                      if (moment.unix(value).hour() === 0 && moment.unix(value).minute() === 0) {
-                        return [moment.unix(value).format('HH:mm'), moment.unix(value).format('YYYY-MM-DD')];
-                      } else {
-                        return [moment.unix(value).format('HH:mm')];
-                      }
+                        return moment.unix(value).format('HH:mm');
                     },
-                    // major: {
-                    //   fontStyle: 'bold',
-                    //   display: true,
-                    //   stepSize: 7200,
-                    // },
+                    autoSkip: true,
                   },
+                },
+                {
+                  id: 'secondary',
+                  afterBuildTicks: (a: any) => {
+                    const ticks: number[] = [];
+                    const tickMoment = moment.unix(a.min).startOf('day');
+                    while (tickMoment.isSameOrBefore(moment.unix(a.max))) {
+                      if (tickMoment.isSameOrAfter(moment.unix(a.min))) {
+                        ticks.push(moment(tickMoment).utc().unix());
+                      }
+                      tickMoment.add(1, 'day');
+                    }
+                    a.ticks = ticks;
+                  },
+                  type: 'linear',
+                  gridLines: {
+                    color: 'rgba(100,100,100,1)',
+                    lineWidth: 1,
+                    drawTicks: false,
+                    drawBorder: false
+                  },
+                  ticks: {
+                    min: timestampFrom,
+                    max: timestampTo,
+                    callback: (value, index, values): any => {
+                      return moment.unix(value).format('YYYY-MM-DD');
+                    },
+                  }
                 }],
                 yAxes: [{
                   ticks: {
-//                    min: Math.floor(suggestedLow),
-//                    max: Math.floor(suggestedHigh),
-                    stepSize: 1,
-                    autoSkip: false
+                    stepSize: 1
                   }
                 }]
             },
             tooltips: {
-              mode: 'x',
+              mode: 'index',
               intersect: false,
               callbacks: {
                 label: (tooltipItem) =>  {
@@ -244,8 +247,8 @@ export class AppComponent implements OnInit {
       this.chart.data.datasets[0].data = average;
       this.chart.config.options.scales.xAxes[0].ticks.min = timestampFrom;
       this.chart.config.options.scales.xAxes[0].ticks.max = timestampTo;
-      //this.chart.config.options.scales.yAxes[0].ticks.min = suggestedLow;
-      //this.chart.config.options.scales.yAxes[0].ticks.max = suggestedHigh;
+      this.chart.config.options.scales.xAxes[1].ticks.min = timestampFrom;
+      this.chart.config.options.scales.xAxes[1].ticks.max = timestampTo;
       this.chart.update();
     }
   }
