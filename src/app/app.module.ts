@@ -13,7 +13,8 @@ import {MatIconModule} from '@angular/material/icon';
     AppComponent
   ],
   imports: [
-    BrowserModule, MatDatepickerModule, MatMomentDateModule, FormsModule, BrowserAnimationsModule, MatInputModule, MatButtonToggleModule, MatIconModule, MatButtonModule
+    BrowserModule, MatDatepickerModule, MatMomentDateModule, FormsModule, BrowserAnimationsModule,
+    MatInputModule, MatButtonToggleModule, MatIconModule, MatButtonModule
   ],
   providers: [],
   bootstrap: [AppComponent]
