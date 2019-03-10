@@ -5,10 +5,8 @@ import * as moment from 'moment';
 import * as Chart from 'chart.js';
 import { groupBy as _groupBy, map as _map, minBy as _minBy, maxBy as _maxBy, meanBy as _meanBy } from 'lodash-es';
 
-import * as AWSConfig from './aws-config.json';
 import { DateAdapter, MAT_DATE_LOCALE, MAT_DATE_FORMATS } from '@angular/material';
 import { MomentDateAdapter } from '@angular/material-moment-adapter';
-import { FormControl } from '@angular/forms';
 
 export const MY_FORMATS = {
   parse: {
@@ -45,11 +43,15 @@ export class AppComponent implements OnInit {
   private refreshCount = 0;
 
   constructor() {
-    AWS.config.region = AWSConfig.Region;
-    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-      IdentityPoolId: AWSConfig.IdentityPoolId
-    });
-    this.dynamodb = new DynamoDB();
+    (async () => {
+      const jsonFetch = await fetch('aws-config.json');
+      const AWSConfig = await jsonFetch.json();
+      AWS.config.region = AWSConfig.Region;
+      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: AWSConfig.IdentityPoolId
+      });
+      this.dynamodb = new DynamoDB();
+    })();
   }
 
   ngOnInit() {

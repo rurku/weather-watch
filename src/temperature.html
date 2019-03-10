@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Temperature</title>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.418.0.min.js"></script>
+</head>
+
+<body>
+  <script>
+    (async function() {
+      const response = await fetch('aws-config.json')
+      const json = await response.json();
+
+      AWS.config.region = json.Region;
+      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: json.IdentityPoolId
+      });
+
+      const dynamodb = new AWS.DynamoDB();
+      const now = new Date();
+      const year = now.getUTCFullYear();
+      const month = now.getUTCMonth() + 1;
+      const day = now.getUTCDate();
+
+      const pad = (n, p) => `0000${n.toFixed()}`.slice(-p);
+
+      const lastResult = await dynamodb.query({
+        TableName: 'temperature',
+        KeyConditionExpression: 'DayKey = :pk',
+        ExpressionAttributeValues: {
+          ':pk': {S: `${pad(year, 4)}-${pad(month,2)}-${pad(day, 2)}`}
+        },
+        ProjectionExpression: '#ts, #temp',
+        ExpressionAttributeNames: {'#ts': 'Timestamp', '#temp': 'Temp'},
+        ScanIndexForward: false,
+        Limit: 1
+      }).promise();
+      document.getElementById('temperature').innerText = lastResult.Items[0].Temp.N + '℃';
+      const lastReadDate = new Date(parseInt(lastResult.Items[0].Timestamp.N) * 1000);
+      const timeString = `${pad(lastReadDate.getHours(),2)}:${pad(lastReadDate.getMinutes(),2)}:${pad(lastReadDate.getSeconds(),2)}`
+      document.getElementById('date').innerText = timeString;
+    })();
+  </script>
+  <div id="temperature"></div>
+  <div id="date"></div>
+</body>
+
+</html>
