@@ -35,26 +35,24 @@ export const MY_FORMATS = {
 })
 export class AppComponent implements OnInit {
   chart: Chart;
-  private dynamodb: DynamoDB;
+  private dynamoDbPromise: Promise<DynamoDB>;
   reading: object;
   public date: moment.Moment;
   public time: string;
   public period: string;
   private refreshCount = 0;
 
-  constructor() {
-    (async () => {
+  ngOnInit() {
+    this.dynamoDbPromise = (async (): Promise<DynamoDB> => {
       const jsonFetch = await fetch('aws-config.json');
       const AWSConfig = await jsonFetch.json();
       AWS.config.region = AWSConfig.Region;
       AWS.config.credentials = new AWS.CognitoIdentityCredentials({
         IdentityPoolId: AWSConfig.IdentityPoolId
       });
-      this.dynamodb = new DynamoDB();
+      return new DynamoDB();
     })();
-  }
 
-  ngOnInit() {
     this.setDate(moment());
     this.period = '1d';
 
@@ -107,9 +105,9 @@ export class AppComponent implements OnInit {
   }
 
   async refresh(refreshCount: number) {
+    const dynamodb = await this.dynamoDbPromise;
     if (refreshCount !== this.refreshCount) { return; }
-
-    const lastResult = await this.dynamodb.query({
+    const lastResult = await dynamodb.query({
       TableName: 'temperature',
       KeyConditionExpression: 'DayKey = :pk',
       ExpressionAttributeValues: {
@@ -170,7 +168,7 @@ export class AppComponent implements OnInit {
         ProjectionExpression: '#ts, #temp',
         IndexName: indexName,
       };
-      const result = await this.dynamodb.query(params).promise();
+      const result = await dynamodb.query(params).promise();
       if (refreshCount !== this.refreshCount) { return; }
       items.push(...result.Items);
       pkRange.add(1, pkUnit as moment.unitOfTime.DurationConstructor);
